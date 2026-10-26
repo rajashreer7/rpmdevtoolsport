@@ -1,0 +1,51 @@
+diff --git a/rpmdev-rmdevelrpms.py b/rpmdev-rmdevelrpms.py
+index 18c1345..a692da0 100755
+--- a/rpmdev-rmdevelrpms.py
++++ b/rpmdev-rmdevelrpms.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python -tt
++#!/usr/bin/env python3
+ # -*- coding: utf-8 -*-
+ 
+ # rpmdev-rmdevelrpms -- Find (and optionally remove) "development" RPMs
+@@ -27,7 +27,11 @@ import re
+ import stat
+ import sys
+ 
+-import rpm
++try:
++    import rpm
++    _has_rpm = True
++except ImportError:
++    _has_rpm = False
+ 
+ try:
+     input = raw_input
+@@ -71,9 +75,13 @@ qf = '%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}'
+ 
+ 
+ # http://rpm.org/ticket/869
+-class myhdr(rpm.hdr):
+-    def __lt__(self, other):
+-        return rpm.versionCompare(self, other) < 0
++if _has_rpm:
++    class myhdr(rpm.hdr):
++        def __lt__(self, other):
++            return rpm.versionCompare(self, other) < 0
++else:
++    class myhdr:  # type: ignore[no-redef]
++        pass
+ 
+ 
+ def isDevelPkg(hdr):
+@@ -192,6 +200,10 @@ def main():
+     if opts.version:
+         version()
+ 
++    if not _has_rpm:
++        print("Error: The 'rpm' Python module is required but is not installed.")
++        sys.exit(1)
++
+     ts = rpm.TransactionSet("/")
+     ts.setVSFlags(~(rpm._RPMVSF_NOSIGNATURES | rpm._RPMVSF_NODIGESTS))
+     mi = ts.dbMatch()

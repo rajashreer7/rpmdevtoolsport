@@ -1,0 +1,19 @@
+diff --git a/rpmdev-setuptree b/rpmdev-setuptree
+index 83cf94e..f8f8d4b 100755
+--- a/rpmdev-setuptree
++++ b/rpmdev-setuptree
+@@ -25,10 +25,12 @@
+ IAM=`id -un`
+ #       returns bare username
+ #
+-PASSWDDIR=`grep ^$IAM: /etc/passwd | awk -F":" '{print $6}'`
++if [ -f /etc/passwd ]; then
++    PASSWDDIR=`grep ^$IAM: /etc/passwd | awk -F":" '{print $6}'`
++fi
+ HOMEDIR=${HOME:=$PASSWDDIR}
+ [ ! -d $HOMEDIR ] && {
+-    echo "ERROR: Home directory for user $IAM not found in /etc/passwd."
++    echo "ERROR: Home directory for user $IAM not found."
+     exit 1
+ }
+ #       and home directory

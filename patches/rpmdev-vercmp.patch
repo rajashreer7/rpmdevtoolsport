@@ -1,0 +1,34 @@
+diff --git a/rpmdev-vercmp b/rpmdev-vercmp
+index c28857c..c9a0db3 100755
+--- a/rpmdev-vercmp
++++ b/rpmdev-vercmp
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python -tt
++#!/usr/bin/env python3
+ # -*- coding: utf-8 -*-
+ #
+ # rpmdev-vercmp -- compare rpm versions
+@@ -21,7 +21,11 @@
+ 
+ import sys
+ 
+-import rpm
++try:
++    import rpm
++    _has_rpm = True
++except ImportError:
++    _has_rpm = False
+ 
+ try:
+     input = raw_input
+@@ -71,6 +75,10 @@ def main():
+             sys.argv[1] in ('-h', '--help', '-help', '--usage'):
+         usage()
+         sys.exit(0)
++
++    if not _has_rpm:
++        print("Error: The 'rpm' Python module is required but is not installed.")
++        sys.exit(1)
+     elif len(sys.argv) == 1:
+         e1 = askforstuff('Epoch1')
+         v1 = askforstuff('Version1')

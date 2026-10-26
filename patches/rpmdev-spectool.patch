@@ -1,0 +1,76 @@
+diff --git a/rpmdev-spectool b/rpmdev-spectool
+index 2c06ef8..0a96d29 100755
+--- a/rpmdev-spectool
++++ b/rpmdev-spectool
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python3
++#!/usr/bin/env python3
+ # -*- mode: Python; indent-tabs-mode: nil; coding: utf-8 -*-
+ #
+ # rpmdev-spectool - a tool to aid getting files when building RPMs
+@@ -30,9 +30,23 @@ from typing import OrderedDict as OrderedDictT
+ from typing import Tuple
+ from urllib.parse import urlparse
+ 
+-import progressbar
+-import requests
+-import rpm
++try:
++    import requests
++    _has_requests = True
++except ImportError:
++    _has_requests = False
++
++try:
++    import progressbar
++    _has_progressbar = True
++except ImportError:
++    _has_progressbar = False
++
++try:
++    import rpm
++    _has_rpm = True
++except ImportError:
++    _has_rpm = False
+ 
+ __version__ = "1.1.0"
+ 
+@@ -247,6 +261,8 @@ class ProgressTracker:
+ # simple streamed file download implementation inspired by requests_download
+ def download(url, target, headers=None,
+              tracker: Optional[ProgressTracker] = None) -> None:
++    if not _has_requests:
++        raise ImportError("The 'requests' Python module is required for downloading but is not installed.")
+     if headers is None:
+         headers = {}
+ 
+@@ -284,7 +300,10 @@ def get_file(url: str, path: str, force: bool,
+             print("File '{}' already present.".format(path))
+             return False
+ 
+-    progress = ProgressTracker(progressbar.DataTransferBar())
++    if _has_progressbar:
++        progress = ProgressTracker(progressbar.DataTransferBar())
++    else:
++        progress = None
+     download(url, path, tracker=progress, headers=headers)
+ 
+     return True
+@@ -292,6 +311,8 @@ def get_file(url: str, path: str, force: bool,
+ 
+ class Spec:
+     def __init__(self, path: str) -> None:
++        if not _has_rpm:
++            raise ImportError("The 'rpm' Python module is required for spec file parsing but is not installed.")
+         self.path = path
+         self.spec = rpm.spec(self.path)
+ 
+@@ -539,6 +560,8 @@ def main() -> int:
+         if args["directory"]:
+             directory = args["directory"]
+         elif args["sourcedir"]:
++            if not _has_rpm:
++                raise ImportError("The 'rpm' Python module is required but is not installed.")
+             directory = rpm.expandMacro("%{_sourcedir}")
+         else:
+             directory = os.getcwd()
