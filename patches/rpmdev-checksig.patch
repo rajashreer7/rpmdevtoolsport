@@ -1,0 +1,33 @@
+diff --git a/rpmdev-checksig b/rpmdev-checksig
+index af757b7..c041917 100755
+--- a/rpmdev-checksig
++++ b/rpmdev-checksig
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python -tt
++#!/usr/bin/env python3
+ #
+ # This program is free software; you can redistribute it and/or modify
+ # it under the terms of the GNU General Public License as published by
+@@ -35,7 +35,11 @@ import os.path
+ import re
+ import sys
+ 
+-import rpm
++try:
++    import rpm
++    _has_rpm = True
++except ImportError:
++    _has_rpm = False
+ 
+ 
+ def lookupKeyID(ts, keyid):
+@@ -122,6 +126,9 @@ def getSigInfo(hdr):
+ 
+ 
+ def main(args):
++    if not _has_rpm:
++        print("Error: The 'rpm' Python module is required but is not installed.")
++        sys.exit(1)
+     finalexit = 0
+     ts = rpm.TransactionSet()
+     for package in args:

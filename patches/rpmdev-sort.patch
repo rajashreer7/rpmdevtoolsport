@@ -1,0 +1,34 @@
+diff --git a/rpmdev-sort b/rpmdev-sort
+index c957f52..5fbbd59 100755
+--- a/rpmdev-sort
++++ b/rpmdev-sort
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python -tt
++#!/usr/bin/env python3
+ # -*- coding: utf-8 -*-
+ #
+ # rpmdev-sort -- sort rpms from standard input
+@@ -23,7 +23,11 @@
+ import re
+ import sys
+ 
+-import rpm
++try:
++    import rpm
++    _has_rpm = True
++except ImportError:
++    _has_rpm = False
+ 
+ 
+ def usage():
+@@ -94,6 +98,10 @@ def main():
+         usage()
+         sys.exit(0)
+ 
++    if not _has_rpm:
++        print("Error: The 'rpm' Python module is required but is not installed.")
++        sys.exit(1)
++
+     lines = []
+     while True:
+         line = sys.stdin.readline()
